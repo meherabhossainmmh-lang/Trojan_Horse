@@ -26,7 +26,8 @@
 12. [Project Structure](#project-structure)
 13. [Environment Variables](#environment-variables)
 14. [Getting Started](#getting-started)
-15. [Deliverables Checklist & Hackathon Docs](#deliverables-checklist--hackathon-docs)
+15. [Hidden Hackathon Demo Mode (`/demo`)](#hidden-hackathon-demo-mode-demo)
+16. [Deliverables Checklist & Hackathon Docs](#deliverables-checklist--hackathon-docs)
 
 ---
 
@@ -40,7 +41,7 @@ Citizens across Bangladesh face preventable safety risks daily — robberies, sn
 
 Nirapod Path is a three-panel web platform connecting citizens, city management teams, and city corporations in a single accountability chain:
 
-- **Citizens** report crime hotspots and infrastructure hazards on an interactive map, with photo evidence and GPS location. (Citizen sign-in is **100% optional** so anyone can report danger immediately).
+- **Citizens** report crime hotspots and infrastructure hazards on an interactive map, with photo evidence and GPS location.
 - **Management panels** (one per City Corporation) review and resolve reports.
 - **City Corporation panels** hold final authority — they can move a report to any status, add remarks, and issue the final **verified** stamp, giving the public a trustworthy, government-backed confirmation.
 
@@ -61,22 +62,19 @@ Every report is scoped to the City Corporation the citizen selects (`DNCC`, `DSC
 
 ## User Roles & Permissions
 
-| Action                                     | User | Management  | City Corporation |
-| ------------------------------------------ | :--: | :---------: | :--------------: |
-| Register / log in                          |  ✅  | ✅ (seeded) |   ✅ (seeded)    |
-| Create a report (select City Corp)         |  ✅  |     ❌      |        ❌        |
-| View own submitted reports                 |  ✅  |      —      |        —         |
-| View reports for their City Corp           |  ❌  |     ✅      |        ✅        |
-| Set status: `under_review → resolved`      |  ❌  |     ✅      |        ✅        |
-| Set status to **any** value, any direction |  ❌  |     ❌      |        ✅        |
-| Add / edit status remark                   |  ❌  |     ❌      |        ✅        |
-| Upvote / confirm a report                  |  ✅  |      —      |        —         |
-| Trigger SOS                                |  ✅  |      —      |        —         |
-| Receive SOS alerts                         |  ❌  |     ❌      |        ✅        |
+| Action                                     | Guest (Unauthenticated) | Citizen (Logged-in) | Management (DNCC/DSCC) | City Corporation / Police | Super Admin |
+| ------------------------------------------ | :--: | :--: | :---------: | :--------------: | :---------: |
+| View public Hotspot Map &amp; reports      |  ✅  |  ✅  |     ✅      |        ✅        |     ✅      |
+| Register / log in                          |  ✅  |  ✅  |  ✅ (seeded) |    ✅ (seeded)   |  ✅ (seeded) |
+| Create a report / trigger Emergency SOS    |  ❌  |  ✅  |     ❌      |        ❌        |     ✅      |
+| View personal Citizen Dashboard            |  ❌  |  ✅  |      —      |        —         |     ✅      |
+| View reports for their assigned Agency     |  ❌  |  ❌  |     ✅      |        ✅        |     ✅      |
+| Set status: `under_review → resolved`      |  ❌  |  ❌  |     ✅      |        ✅        |     ✅      |
+| Set status to **any** value, any direction |  ❌  |  ❌  |     ❌      |        ✅        |     ✅      |
+| Add / edit official status remark          |  ❌  |  ❌  |     ❌      |        ✅        |     ✅      |
+| Create/activate/deactivate User accounts   |  ❌  |  ❌  |     ❌      |        ❌        |     ✅      |
 
-**Key rule:** Management can only push a report forward, from `under_review` to `resolved`. It cannot verify a report or move it backward. City Corporation has unrestricted control over status in both directions and is the only role that can mark a report `verified` or leave a remark.
-
-Management and City Corporation accounts are **seeded in bulk via script**, scoped one Management account per City Corporation — not self-registered.
+**Key rule:** Users never manually choose their role during login. When an account authenticates on `/login`, Nirapod Path automatically determines their role and routes them to their dedicated dashboard (`/user/dashboard`, `/management/[id]/reports`, `/city-corp/[id]/reports`, or `/super-admin`).
 
 ## Report Status Lifecycle
 
@@ -239,17 +237,20 @@ Implemented entirely client-side:
 ```
 /app
   /(public)
-    /login
-    /register
+    /login                -- Dedicated Government-style Login Page (`/login`)
+    /register             -- Dedicated Citizen Registration Page (`/register`)
+  /demo                   -- Hidden Hackathon Quick-Login Sandbox (`/demo`)
   /user
-    /report/new
-    /reports
-    /map
+    /dashboard            -- Citizen Dashboard (My Reports, SOS History, Profile)
+    /report/new           -- Report submission form
+    /reports              -- Submitted reports list & community verification
+    /map                  -- Public interactive hotspot map
   /management
-    /[cityCorpId]/reports
+    /[cityCorpId]/reports -- Management review queue (`under_review -> resolved`)
   /city-corp
-    /[cityCorpId]/reports
-    /[cityCorpId]/alerts
+    /[cityCorpId]/reports -- City Corporation control room (`under_review`, `resolved`, `verified`)
+    /[cityCorpId]/alerts  -- Realtime Pusher SOS emergency control room
+  /super-admin            -- Super Admin platform governance dashboard
   /api
     /pusher-auth          -- Pusher private channel auth
     /edgestore            -- EdgeStore API endpoint
@@ -324,15 +325,17 @@ npm run db:seed
 npm run dev
 ```
 
-### 1-Click Quick Hackathon Demo Accounts
-On `/login`, click any button under **"Quick Demo Accounts (1-Click Hackathon Login)"**:
-* **`user@nirapod.bd`** — Citizen / Commuter
-* **`management.dncc@nirapod.bd`** — DNCC Management Panel (`under_review → resolved`)
-* **`management.dscc@nirapod.bd`** — DSCC Management Panel
-* **`citycorp.dncc@nirapod.bd`** — DNCC City Corporation Authority (`under_review`, `resolved`, `verified` + remark)
-* **`citycorp.dscc@nirapod.bd`** — DSCC City Corporation Authority
-* **`citycorp.dmb@nirapod.bd`** — Disaster Management Board (DMB) Authority
-* **`superadmin@nirapod.bd`** — Super Admin (Full Platform Access)
+---
+
+## Hidden Hackathon Demo Mode (`/demo`)
+
+To keep the production navigation bar 100% authentic as an official municipal portal, **all quick demo role cards have been moved to a hidden hackathon evaluation sandbox:**
+
+👉 **[http://localhost:3000/demo](http://localhost:3000/demo)** (or `/demo-login`)
+
+Here, judges can click **"Login as [Role]"** on any card (`Citizen`, `DMB Admin`, `DNCC Admin`, `DSCC Admin`, `Police DMP`, `Super Admin`) to instantly authenticate and be routed directly to that role's dashboard.
+
+---
 
 ## Deliverables Checklist & Hackathon Docs
 
