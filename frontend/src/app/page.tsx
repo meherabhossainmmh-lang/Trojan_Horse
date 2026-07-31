@@ -29,6 +29,7 @@ import SOSModal from "@/components/SOSModal";
 import ReportDetailModal from "@/components/ReportDetailModal";
 import AuthorityDashboard from "@/components/AuthorityDashboard";
 import RouteAdvisorModal from "@/components/RouteAdvisorModal";
+import ProximityAlertModal from "@/components/ProximityAlertModal";
 
 // Dynamic import for Leaflet Map Viewer to disable SSR
 const MapViewer = dynamic(() => import("@/components/MapViewer"), {
@@ -58,6 +59,7 @@ export default function HomePage() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isSosModalOpen, setIsSosModalOpen] = useState(false);
   const [isAdvisorModalOpen, setIsAdvisorModalOpen] = useState(false);
+  const [isProximityModalOpen, setIsProximityModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
@@ -242,6 +244,14 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsProximityModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 text-xs font-extrabold border border-rose-500/30 transition-all shadow-lg"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
+                  <span>Simulate Proximity Danger Alert</span>
+                </button>
+
                 <button
                   onClick={() => setIsAdvisorModalOpen(true)}
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition-all"
@@ -476,6 +486,11 @@ export default function HomePage() {
       <RouteAdvisorModal
         isOpen={isAdvisorModalOpen}
         onClose={() => setIsAdvisorModalOpen(false)}
+      />
+
+      <ProximityAlertModal
+        isOpen={isProximityModalOpen}
+        onClose={() => setIsProximityModalOpen(false)}
       />
     </div>
   );

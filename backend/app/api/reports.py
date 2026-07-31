@@ -141,7 +141,7 @@ async def create_report(payload: ReportCreate, db: Session = Depends(get_db)):
         address=payload.address,
         photo_url=payload.photo_url
         or "https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?w=800&auto=format&fit=crop&q=80",
-        status="Received",
+        status="Submitted",
         severity_score=ai_result.severity_score,
         ai_trust_score=70 if payload.is_dmb_direct else 60,
         ai_summary=ai_result.ai_executive_summary,

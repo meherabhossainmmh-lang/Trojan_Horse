@@ -18,6 +18,7 @@ def get_dashboard_statistics(db: Session = Depends(get_db)):
     total_reports = db.query(Report).count()
     resolved_reports = db.query(Report).filter(Report.status == "Resolved").count()
     in_progress = db.query(Report).filter(Report.status == "In Progress").count()
+    submitted = db.query(Report).filter(Report.status == "Submitted").count()
     received = db.query(Report).filter(Report.status == "Received").count()
     under_verify = (
         db.query(Report).filter(Report.status == "Under Verification").count()
@@ -46,6 +47,7 @@ def get_dashboard_statistics(db: Session = Depends(get_db)):
         "total_reports": total_reports,
         "resolved_reports": resolved_reports,
         "in_progress": in_progress,
+        "submitted": submitted,
         "received": received,
         "under_verify": under_verify,
         "dmb_direct_count": dmb_direct_count,

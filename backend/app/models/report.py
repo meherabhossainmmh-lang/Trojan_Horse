@@ -14,7 +14,7 @@ class Report(Base):
     longitude = Column(Float, nullable=False)
     address = Column(String(255), nullable=False)
     photo_url = Column(String(500), nullable=True)
-    status = Column(String(50), default="Received", nullable=False, index=True)
+    status = Column(String(50), default="Submitted", nullable=False, index=True)
     severity_score = Column(Integer, default=50, nullable=False)
     ai_trust_score = Column(Integer, default=60, nullable=False)
     ai_summary = Column(Text, nullable=True)

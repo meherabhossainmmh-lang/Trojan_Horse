@@ -4,6 +4,7 @@ from app.database import get_db, engine, Base
 from app.models.user import AuthorityAgency, User
 from app.models.report import Report, ReportVerification, ReportComment
 from app.models.sos import SOSAlert
+from app.models.ai_log import AIAnalysisLog
 from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/seed", tags=["Database Seeding"])
@@ -17,7 +18,7 @@ def seed_database_data(db: Session):
         # Clear existing reports for clean demo reset
         db.query(ReportVerification).delete()
         db.query(ReportComment).delete()
-        db.query(AIAnalysisLog).delete() if "AIAnalysisLog" in globals() else None
+        db.query(AIAnalysisLog).delete()
         db.query(Report).delete()
         db.query(SOSAlert).delete()
         db.query(AuthorityAgency).delete()
@@ -70,7 +71,7 @@ def seed_database_data(db: Session):
             longitude=90.3687,
             address="Mirpur 10 Roundabout, Dhaka",
             photo_url="https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?w=800&auto=format&fit=crop&q=80",
-            status="Received",
+            status="Submitted",
             severity_score=88,
             ai_trust_score=85,
             ai_summary="CRITICAL HAZARD: Open drainage manhole at Mirpur 10 intersection poses immediate fatal hazard to pedestrians and rickshaws.",
@@ -134,7 +135,7 @@ def seed_database_data(db: Session):
             longitude=90.4172,
             address="Motijheel Commercial Area near Shapla Chattar, Dhaka",
             photo_url="https://images.unsplash.com/photo-1541888946425-d0bbbb547b81?w=800&auto=format&fit=crop&q=80",
-            status="Assigned to Authority",
+            status="In Progress",
             severity_score=78,
             ai_trust_score=75,
             ai_summary="FLOODING RISK: Blocked storm drainage causing 2ft waterlogging in Motijheel business district.",
@@ -169,7 +170,7 @@ def seed_database_data(db: Session):
             longitude=90.4152,
             address="Gulshan 2 North Avenue, Dhaka",
             photo_url="https://images.unsplash.com/photo-1517732306149-e8f829eb588a?w=800&auto=format&fit=crop&q=80",
-            status="Received",
+            status="Submitted",
             severity_score=65,
             ai_trust_score=70,
             ai_summary="MUNICIPAL LIGHTING: 4 consecutive street lamps inoperative along Gulshan 2 North Avenue; DNCC electrical division assigned.",
@@ -185,7 +186,7 @@ def seed_database_data(db: Session):
             longitude=90.4219,
             address="Kuril Flyover Slip Road, Dhaka",
             photo_url="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80",
-            status="In Progress",
+            status="Under Verification",
             severity_score=80,
             ai_trust_score=82,
             ai_summary="HAZARD ALERT: Uncovered cable trench posing rollover hazard to motorcycles on Kuril flyover.",
@@ -233,7 +234,7 @@ def seed_database_data(db: Session):
     db.add(sample_sos)
 
     db.commit()
-    return {"message": "Database seeded successfully with 8 realistic Bangladesh reports, 4 authorities, and 1 active emergency SOS alert!"}
+    return {"message": "Database seeded successfully with 8 realistic Bangladesh reports across all lifecycle states, 4 authorities, and 1 active emergency SOS alert!"}
 
 @router.post("")
 def trigger_seed(db: Session = Depends(get_db)):

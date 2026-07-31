@@ -41,7 +41,7 @@ class ReportCreate(BaseModel):
 class ReportUpdateStatus(BaseModel):
     status: str = Field(
         ...,
-        description="Received, Under Verification, Assigned to Authority, In Progress, Resolved",
+        description="Submitted, Received, Under Verification, In Progress, Resolved",
     )
     resolution_notes: Optional[str] = None
     after_repair_photo_url: Optional[str] = None
