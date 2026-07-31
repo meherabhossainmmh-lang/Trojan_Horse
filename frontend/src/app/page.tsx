@@ -67,6 +67,17 @@ export default function HomePage() {
     loadReports();
   }, [selectedCategory, selectedStatus, dmbOnly, searchQuery]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes("authorities") || hash.includes("admin")) {
+        setActiveTab("authorities");
+      } else if (hash.includes("advisor")) {
+        setIsAdvisorModalOpen(true);
+      }
+    }
+  }, []);
+
   const loadReports = async () => {
     setLoading(true);
     try {
