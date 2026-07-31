@@ -1,1 +1,0 @@
-# Nirapod Core Application Package

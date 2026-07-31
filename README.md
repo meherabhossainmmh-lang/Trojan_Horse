@@ -1,124 +1,342 @@
-# Nirapod (নিরাপদ) — Real-Time Citizen Public Safety & Hazard Intelligence Platform
+# Nirapod Path (Safe Path) — Community Safety & Hazard Reporting Platform
+
+> A web platform empowering citizens of Dhaka to report crime hotspots and infrastructure hazards in real time, route them to the right authority, and track resolution — built for [Hackathon Name] under Problem Statement 2.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
-[![Frontend: Next.js 14](https://img.shields.io/badge/Frontend-Next.js%2014-black?logo=next.js)](https://nextjs.org)
-[![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com)
-[![Database: PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-316192?logo=postgresql)](https://www.postgresql.org)
-[![AI: Grok & Voyage](https://img.shields.io/badge/AI-Grok%20%7C%20Voyage-6366F1)](https://x.ai)
-
-> **"Empowering citizens to improve Bangladesh's public safety in real time—and helping others avoid danger before it finds them."**
+[![Frontend & Backend: Next.js 14](https://img.shields.io/badge/Framework-Next.js%2014-black?logo=next.js)](https://nextjs.org)
+[![Database: Neon Postgres + Drizzle](https://img.shields.io/badge/Database-Neon%20%7C%20Drizzle-316192?logo=postgresql)](https://neon.tech)
+[![Realtime: Pusher](https://img.shields.io/badge/Realtime-Pusher-6366F1)](https://pusher.com)
+[![Storage: EdgeStore](https://img.shields.io/badge/Storage-EdgeStore-009688)](https://edgestore.dev)
 
 ---
 
-## 1. Executive Summary & Project Idea
+## Table of Contents
 
-In urban centers across Bangladesh—such as Dhaka, Gazipur, and Chattogram—commuters face daily safety hazards ranging from street snatching (*chintai*) and robbery at documented hotspots to open drainage manholes, damaged roads, and waterlogged intersections. While citizens often post photos of these dangers on social media, those fragmented updates rarely reach responsible government agencies in an actionable, verified format.
-
-**Nirapod** (**নিরাপদ** / *Safe*) is an end-to-end, community-driven, AI-empowered platform that bridges this gap. It provides:
-* **Interactive Crime Hotspot & Hazard Mapping** with real-time **Danger Zone Alerts** and **Proximity Warnings**.
-* **AI Smart Authority Routing** (Disaster Management Board, City Corporations, and Metropolitan Police).
-* **Inter-Agency Emergency SOS Accountability & Oversight** where City Corporations monitor Metropolitan Police (DMP 999) response and check on citizen safety.
-* **Direct Disaster Management Board (DMB) Dispatch** for high-priority infrastructure emergencies.
-* **Full Lifecycle Resolution Tracking** across all 5 official states: `Submitted` -> `Received` -> `Under Verification` -> `In Progress` -> `Resolved`.
-
----
-
-## 2. Comprehensive Planning Documentation & Hackathon Scripts
-
-Review our complete engineering documentation in the `docs/` folder:
-
-* [**Project Idea & Executive Summary**](docs/PROJECT_IDEA.md) — Why Nirapod wins, problem analysis, value proposition, and target audiences.
-* [**3–5 Minute Presentation & Live Demo Script**](docs/DEMO_WALKTHROUGH.md) — Step-by-step hackathon judging script and walkthrough.
-* [**System Architecture & Design**](docs/SYSTEM_ARCHITECTURE.md) — High-level architecture, Mermaid & ASCII diagrams, Next.js + FastAPI + PostgreSQL stack breakdown.
-* [**Workflow Diagrams**](docs/WORKFLOW_DIAGRAM.md) — Automated hazard reporting, Direct DMB Dispatch, Inter-Agency SOS oversight, and community verification workflows.
-* [**Database (ER) Diagram & PostgreSQL Schema**](docs/DATABASE_ER_DIAGRAM.md) — Relational ER diagrams, table specifications, geospatial indexes, and performance strategy.
-* [**AI Pipeline Architecture**](docs/AI_PIPELINE.md) — Multi-modal Grok API vision/text evaluation, Voyage AI duplicate detection, AI Route Safety Advisor, and fallback heuristic engine.
-* [**User Flow Diagrams**](docs/USER_FLOW.md) — Step-by-step journeys for Commuters, Citizens, Vulnerable Groups, and Government Authorities.
-* [**Technical Writeup**](docs/TECHNICAL_WRITEUP.md) — Whitepaper explaining data flow, architectural choices, and how reports reach government agencies.
+1. [Problem Statement](#problem-statement)
+2. [Solution Overview](#solution-overview)
+3. [Core Features](#core-features)
+4. [User Roles & Permissions](#user-roles--permissions)
+5. [Report Status Lifecycle](#report-status-lifecycle)
+6. [Tech Stack](#tech-stack)
+7. [System Architecture](#system-architecture)
+8. [Data Flow](#data-flow)
+9. [Database Schema](#database-schema)
+10. [Realtime Strategy](#realtime-strategy)
+11. [Danger Zone Alerts](#danger-zone-alerts)
+12. [Project Structure](#project-structure)
+13. [Environment Variables](#environment-variables)
+14. [Getting Started](#getting-started)
+15. [Deliverables Checklist & Hackathon Docs](#deliverables-checklist--hackathon-docs)
 
 ---
 
-## 3. Feature Matrix (Problem Statement Compliance)
+## Problem Statement
 
-| Requirement | Status | Implementation Details |
-| :--- | :---: | :--- |
-| **1. Interactive Map** | ✅ | Leaflet map with custom color-coded pins for Robbery, Snatching, and Mugging hotspots across Dhaka & Gazipur. |
-| **2. Citizen Reporting System** | ✅ | Fast photo upload, GPS latitude/longitude selection, title, description, and real-time AI category assistant. |
-| **3. Smart Authority Routing** | ✅ | Rule-based & AI-assisted dispatch to DMB, Dhaka North/South City Corporations (DNCC/DSCC), or Police (DMP). |
-| **4. Real-Time Public Alerts** | ✅ | **Simulated Commuter Proximity Alert Modal** warning users approaching high-risk snatching or drainage danger zones. |
-| **5. Emergency SOS Module** | ✅ | Simultaneous alert to DMP 999 & City Corp with **Inter-Agency Oversight** (City Corp checks on citizen & DMP response). |
-| **6. Community Verification** | ✅ | Citizen upvoting ("I saw this too"), false-report flagging, and dynamic AI-assisted Trust Score (0-100). |
-| **7. Resolution Tracking** | ✅ | Complete 5-stage lifecycle tracking: `Submitted` -> `Received` -> `Under Verification` -> `In Progress` -> `Resolved`. |
-| **8. Authority Dashboard** | ✅ | Official command center for DMB, DNCC, DSCC, and DMP with status updates, SOS checkups, and after-repair photo uploads. |
-| **9. AI-Assisted Features** | ✅ | Grok API Vision/NLP severity scoring, Voyage AI semantic duplicate clustering, and AI Route Safety Advisor. |
+Citizens across Bangladesh face preventable safety risks daily — robberies, snatching, uncovered manholes, and damaged roads — with no single platform to report these hazards in real time or warn others before they become victims. Reports posted informally on social media rarely reach the responsible authority, leaving dangerous locations unaddressed for long periods.
 
----
+**The challenge:** design and build a web application that empowers citizens to report crime and infrastructure hazards in real time, helps others avoid danger before it finds them, and gives authorities a structured channel to act on verified reports.
 
-## 4. API Keys & Token Configuration Instructions
+## Solution Overview
 
-Nirapod is designed to integrate seamlessly with cloud AI services while providing an **Intelligent Heuristic Fallback Engine** so the app works out-of-the-box even without API keys.
+Nirapod Path is a three-panel web platform connecting citizens, city management teams, and city corporations in a single accountability chain:
 
-### Where to Insert Your API Keys
-Inside the `backend/` directory, copy `.env.example` to `.env` and insert your tokens:
+- **Citizens** report crime hotspots and infrastructure hazards on an interactive map, with photo evidence and GPS location. (Citizen sign-in is **100% optional** so anyone can report danger immediately).
+- **Management panels** (one per City Corporation) review and resolve reports.
+- **City Corporation panels** hold final authority — they can move a report to any status, add remarks, and issue the final **verified** stamp, giving the public a trustworthy, government-backed confirmation.
 
-```bash
-cd backend
-cp .env.example .env
+Every report is scoped to the City Corporation the citizen selects (`DNCC`, `DSCC`, `DMB`), so only the relevant authority sees and acts on it — mirroring how real municipal accountability works.
+
+## Core Features
+
+| #   | Feature                               | Description                                                                                                                        |
+| --- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Interactive hotspot map**           | Citizens mark robbery/snatching-prone locations on an OpenStreetMap-based map.                                                     |
+| 2   | **Danger zone alerts**                | Live geolocation tracking warns users client-side when they approach a reported hotspot (`<ProximityAlert />`).                    |
+| 3   | **Instant hazard reporting**          | Photo upload (`EdgeStore` / preset) + auto-captured GPS + description, pinned to the map.                                         |
+| 4   | **Authority routing**                 | Reports are scoped to a selected City Corporation and appear directly on that authority's dashboard — no manual forwarding needed. |
+| 5   | **Status tracking**                   | Every report moves through a clear lifecycle, visible to the reporter at all times.                                                |
+| 6   | **Community verification**            | Other users can upvote/confirm existing reports to keep information current and trustworthy.                                       |
+| 7   | **Emergency SOS**                     | One-tap button shares live GPS location and instantly alerts the relevant authority dashboard via **Pusher Realtime**.             |
+| 8   | **Three-panel accountability system** | User → Management → City Corporation, each with clearly scoped powers.                                                             |
+
+## User Roles & Permissions
+
+| Action                                     | User | Management  | City Corporation |
+| ------------------------------------------ | :--: | :---------: | :--------------: |
+| Register / log in                          |  ✅  | ✅ (seeded) |   ✅ (seeded)    |
+| Create a report (select City Corp)         |  ✅  |     ❌      |        ❌        |
+| View own submitted reports                 |  ✅  |      —      |        —         |
+| View reports for their City Corp           |  ❌  |     ✅      |        ✅        |
+| Set status: `under_review → resolved`      |  ❌  |     ✅      |        ✅        |
+| Set status to **any** value, any direction |  ❌  |     ❌      |        ✅        |
+| Add / edit status remark                   |  ❌  |     ❌      |        ✅        |
+| Upvote / confirm a report                  |  ✅  |      —      |        —         |
+| Trigger SOS                                |  ✅  |      —      |        —         |
+| Receive SOS alerts                         |  ❌  |     ❌      |        ✅        |
+
+**Key rule:** Management can only push a report forward, from `under_review` to `resolved`. It cannot verify a report or move it backward. City Corporation has unrestricted control over status in both directions and is the only role that can mark a report `verified` or leave a remark.
+
+Management and City Corporation accounts are **seeded in bulk via script**, scoped one Management account per City Corporation — not self-registered.
+
+## Report Status Lifecycle
+
+```
+             ┌──────────────┐
+   created → │ under_review │ ←───────────────┐
+             └──────┬───────┘                 │
+                     │ Management or           │ City Corp
+                     │ City Corp                │ can revert
+                     ▼                          │ any status
+             ┌──────────────┐                  │ back here
+             │   resolved   │ ─────────────────┘
+             └──────┬───────┘
+                     │ City Corp only
+                     ▼
+             ┌──────────────┐
+             │   verified   │
+             └──────────────┘
 ```
 
-Open `.env` and configure your tokens:
+- New reports are created with status **`under_review`** by default.
+- **Management** may only perform `under_review → resolved`.
+- **City Corporation** may set the status to any of the three values, from any current value — including sending a `resolved` or `verified` report back to `under_review` (e.g. "poor work, redo") for Management to act on again.
+- An optional **status remark** (e.g. *"Good work"* / *"Poor work, do it again"*) can be attached only by City Corporation, and is overwritten on each update.
+
+## Tech Stack
+
+| Layer              | Choice                                            | Reasoning                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework          | **Next.js (latest, App Router + Server Actions)** | Single codebase for frontend + backend, fast to build and deploy                                                                                                           |
+| Map                | **Leaflet.js + OpenStreetMap**                    | Free, no API key, no billing risk                                                                                                                                          |
+| Database           | **Neon (Postgres)**                               | Serverless Postgres, generous free tier (`DATABASE_URL`)                                                                                                                   |
+| ORM                | **Drizzle ORM**                                   | Lightweight, type-safe, fast to iterate under time pressure                                                                                                                |
+| File storage       | **EdgeStore**                                     | Purpose-built for Next.js, simple SDK, free tier (`EDGE_STORE_ACCESS_KEY` / `SECRET`)                                                                                      |
+| Authentication     | **Custom — Server Actions + httpOnly cookies**    | No third-party auth dependency; passwords hashed (`bcryptjs`)                                                                                                              |
+| Realtime (SOS)     | **Pusher (free tier)**                            | Vercel serverless can't hold long-lived connections; Pusher offloads persistent connections (`city-corp-{id}-alerts`)                                                      |
+| Danger zone alerts | **Browser Geolocation API (client-side only)**    | No server/infra needed — pure client-side Haversine distance calculation                                                                                                   |
+| Hosting            | **Vercel**                                        | Native Next.js support, zero-config deploys                                                                                                                                |
+
+**No paid APIs are required anywhere in this stack.** All services used (Neon, EdgeStore, Pusher, Vercel) have free tiers sufficient for a hackathon demo. Even if environment variables are left blank, Nirapod Path automatically falls back to client/memory demo mode!
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Next.js App (Vercel)                   │
+│                                                                 │
+│   ┌───────────┐   ┌───────────────┐   ┌───────────────────┐  │
+│   │ User Panel │   │ Management     │   │ City Corporation   │  │
+│   │            │   │ Panel          │   │ Panel               │  │
+│   └─────┬─────┘   └───────┬───────┘   └──────────┬──────────┘  │
+│         │                   │                       │            │
+│         └───────────────────┼───────────────────────┘            │
+│                              │                                    │
+│                    Server Actions Layer                          │
+│              (auth, report CRUD, status updates)                 │
+│                              │                                    │
+│           ┌──────────────────┼──────────────────┐                │
+│           ▼                  ▼                  ▼                │
+│    ┌────────────┐   ┌───────────────┐   ┌────────────────┐      │
+│    │   Neon DB   │   │  EdgeStore     │   │  Pusher (SOS)   │      │
+│    │  (Drizzle)  │   │ (photo upload) │   │   trigger/sub   │      │
+│    └────────────┘   └───────────────┘   └────────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Data Flow
+
+**Hazard / hotspot report submission:**
+```
+User fills form (photo + auto-GPS + description + selects City Corp)
+   → Server Action uploads photo to EdgeStore
+   → Server Action writes report row to Neon (status: under_review)
+   → Report appears immediately on the map (all users)
+   → Report appears on the relevant City Corp's Management + City Corp dashboards
+```
+
+**Status update:**
+```
+Management/City Corp changes status via dashboard
+   → Server Action validates role-based permission
+   → Updates report row (status, status_comment if City Corp)
+   → User's own report list reflects new status on next fetch
+```
+
+**SOS emergency:**
+```
+User taps SOS → browser captures live GPS
+   → Server Action writes SOS event to Neon
+   → Server Action triggers Pusher event on `city-corp-{id}-alerts` channel
+   → City Corp dashboard (subscribed client-side) shows instant alert + location
+```
+
+## Database Schema
+
+```
+city_corporations
+├── id
+├── name                    -- e.g. "Dhaka North City Corporation"
+└── created_at
+
+users
+├── id
+├── role                    -- 'user' | 'management' | 'city_corp' | 'super_admin'
+├── city_corporation_id     -- nullable; set for management & city_corp roles
+├── email
+├── password_hash
+└── created_at
+
+reports
+├── id
+├── user_id                 -- reporter
+├── city_corporation_id     -- selected authority scope
+├── type                    -- 'hazard' | 'crime_hotspot'
+├── status                  -- 'under_review' | 'resolved' | 'verified' (default: under_review)
+├── status_comment          -- nullable, City Corp only, overwritten on each edit
+├── photo_url
+├── lat
+├── lng
+├── description
+├── created_at
+└── updated_at
+
+report_votes
+├── id
+├── report_id
+├── user_id                 -- one vote per user per report
+└── created_at
+
+sos_alerts
+├── id
+├── user_id
+├── city_corporation_id
+├── lat
+├── lng
+└── created_at
+```
+
+## Realtime Strategy
+
+Only **one** feature in this platform genuinely requires server-pushed realtime updates: **SOS alerts to the City Corporation dashboard.** Every other "live" feature is handled without server push:
+
+| Feature                              | Mechanism                                              | Why                                                                                    |
+| ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| SOS → authority dashboard            | **Pusher** (trigger on submit, subscribe on dashboard) | Needs true server → client push; Vercel serverless rules out self-hosted SSE/WebSocket |
+| Danger zone proximity alerts         | Client-side `watchPosition()` + distance check         | Pure math against already-fetched hotspot data — no backend involvement needed         |
+| Status updates on user's own reports | Refetch on page load/focus                             | Not time-critical for the reporter; avoids extra infra                                 |
+
+## Danger Zone Alerts
+
+Implemented entirely client-side:
+
+1. On consent, `navigator.geolocation.watchPosition()` tracks the user's live position.
+2. Hotspot coordinates are fetched once (or refreshed periodically) from the database.
+3. On each position update, a Haversine distance calculation checks proximity against every hotspot.
+4. If the user falls within a defined radius (e.g. 100m) of a hotspot, an in-app toast/banner warns them — no server round-trip required.
+
+## Project Structure
+
+```
+/app
+  /(public)
+    /login
+    /register
+  /user
+    /report/new
+    /reports
+    /map
+  /management
+    /[cityCorpId]/reports
+  /city-corp
+    /[cityCorpId]/reports
+    /[cityCorpId]/alerts
+  /api
+    /pusher-auth          -- Pusher private channel auth
+    /edgestore            -- EdgeStore API endpoint
+/actions
+  auth.ts
+  reports.ts
+  status.ts
+  sos.ts
+/db
+  schema.ts               -- Drizzle schema
+  index.ts
+  seed.ts
+/lib
+  pusher.ts
+  edgestore.ts
+  edgestore-server.ts
+  geolocation.ts
+  ai.ts
+/components
+  Map/
+  ReportForm/
+  ReportList/
+  StatusBadge/
+  SOSButton/
+  Navigation/
+  ProximityAlert/
+  RouteAdvisor/
+```
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in your keys:
 
 ```env
-# 1. Grok API / xAI Token (or OpenAI-compatible API key for vision/text analysis)
-GROK_API_KEY="INSERT_YOUR_GROK_API_KEY_HERE"
-GROK_API_BASE_URL="https://api.x.ai/v1"
-GROK_MODEL="grok-beta"
-
-# 2. Voyage AI Token (for vector embeddings & duplicate report clustering)
-VOYAGE_API_KEY="INSERT_YOUR_VOYAGE_API_KEY_HERE"
-VOYAGE_MODEL="voyage-2"
-
-# 3. Database Connection (PostgreSQL or local SQLite for testing)
-DATABASE_URL="sqlite:///./nirapod.db"
-# For PostgreSQL: DATABASE_URL="postgresql://user:password@localhost:5432/nirapod"
+DATABASE_URL=                      # Neon Postgres connection string
+EDGE_STORE_ACCESS_KEY=             # EdgeStore Access Key
+EDGE_STORE_SECRET_KEY=             # EdgeStore Secret Key
+# PUSHER CONFIGURATION
+PUSHER_APP_ID=
+NEXT_PUBLIC_PUSHER_KEY=
+NEXT_PUBLIC_PUSHER_SECRET=
+NEXT_PUBLIC_PUSHER_CLUSTER=ap2
+SESSION_SECRET=super-secret-key-change-in-prod-deployment
 ```
 
----
+## Getting Started
 
-## 5. Quick Start & Installation Guide
-
-### Prerequisites
-* Node.js v18+ & npm
-* Python 3.11+ & pip
-
-### Step 1: Start the Backend (FastAPI + AI Engine)
 ```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Reset and seed 8 realistic Bangladesh demo reports across all 5 lifecycle states + Inter-Agency SOS
-python3 seed.py
-
-# Launch FastAPI server on port 8000
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-* Backend API Docs available at: `http://localhost:8000/docs`
-
-### Step 2: Start the Frontend (Next.js 14)
-Open a second terminal window:
-```bash
-cd frontend
+# install dependencies
 npm install
+
+# push Drizzle schema to Neon
+npm run db:push
+
+# seed City Corporations + Management/City Corp accounts
+npm run db:seed
+
+# run locally
 npm run dev
 ```
-* Application accessible at: `http://localhost:3000`
-* *Note:* If you run the frontend without starting Python, Nirapod's **Standalone Client Demo Mode** automatically activates using browser `localStorage`!
+
+### 1-Click Quick Hackathon Demo Accounts
+On `/login`, click any button under **"Quick Demo Accounts (1-Click Hackathon Login)"**:
+* **`user@nirapod.bd`** — Citizen / Commuter
+* **`management.dncc@nirapod.bd`** — DNCC Management Panel (`under_review → resolved`)
+* **`management.dscc@nirapod.bd`** — DSCC Management Panel
+* **`citycorp.dncc@nirapod.bd`** — DNCC City Corporation Authority (`under_review`, `resolved`, `verified` + remark)
+* **`citycorp.dscc@nirapod.bd`** — DSCC City Corporation Authority
+* **`citycorp.dmb@nirapod.bd`** — Disaster Management Board (DMB) Authority
+* **`superadmin@nirapod.bd`** — Super Admin (Full Platform Access)
+
+## Deliverables Checklist & Hackathon Docs
+
+- [x] Working prototype: hotspot map, hazard reporting flow, SOS feature
+- [x] Three functional panels: User (`/user/map`), Management (`/management/1/reports`), City Corporation (`/city-corp/1/reports`)
+- [x] Status lifecycle enforced by role (`under_review → resolved → verified`, City Corp full control)
+- [x] Community upvote/confirm on reports (`<ReportList />`)
+- [x] Danger zone proximity alerts (`<ProximityAlert />` & `geolocation.ts`)
+- [x] Technical writeup & whitepapers — available in `/docs` folder:
+  - [**Project Idea & Executive Summary**](docs/PROJECT_IDEA.md)
+  - [**System Architecture & Design**](docs/SYSTEM_ARCHITECTURE.md)
+  - [**Workflow Diagrams**](docs/WORKFLOW_DIAGRAM.md)
+  - [**Database (ER) Diagram**](docs/DATABASE_ER_DIAGRAM.md)
+  - [**AI Pipeline Architecture**](docs/AI_PIPELINE.md)
+  - [**3–5 Minute Live Walkthrough Script**](docs/DEMO_WALKTHROUGH.md)
+- [x] 3–5 minute demo video / live walkthrough script
 
 ---
 
-## 6. Zero AI Footprint & Quality Standards
-
-* Authored cleanly with atomic, structured Git commit history by **Meherab Hossain**.
-* Zero AI attribution, signatures, or metadata in source code, documentation, or commit history.
+*Built for [Hackathon Name] — Problem Statement 2: Community-Driven Public Safety Platform.*

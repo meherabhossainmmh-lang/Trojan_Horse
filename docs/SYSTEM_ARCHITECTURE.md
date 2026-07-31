@@ -2,10 +2,11 @@
 
 ## 1. High-Level Architectural Overview
 
-Nirapod is structured as a modern, decoupled cloud application composed of three primary layers:
+Nirapod is structured as a modern, decoupled cloud application composed of four primary layers:
 1. **Presentation & Interactive Geospatial Layer:** Built with Next.js 14 (App Router, TypeScript, Tailwind CSS, and React-Leaflet / OpenStreetMap).
-2. **Application & AI Microservices Layer:** Built with Python 3.11+ and FastAPI, leveraging Pydantic v2 schemas, asynchronous REST endpoints, and integrated AI services (Grok API, Voyage AI, and local smart heuristics).
-3. **Data Persistence & Geospatial Indexing Layer:** Designed around PostgreSQL with SQLAlchemy 2.0 ORM, optimized indexing for geographic coordinates and trust scoring, and SQLite fallback for frictionless local execution.
+2. **Role-Based Security & Authentication Layer:** JWT-based stateless authentication with direct bcrypt password hashing and Role-Based Access Control (`Guest`, `Citizen`, `Authority Admin`, `Super Admin`).
+3. **Application & AI Microservices Layer:** Built with Python 3.11+ and FastAPI, leveraging Pydantic v2 schemas, asynchronous REST endpoints, and integrated AI services (Grok API, Voyage AI, and local smart heuristics).
+4. **Data Persistence & Geospatial Indexing Layer:** Designed around PostgreSQL with SQLAlchemy 2.0 ORM, optimized indexing for geographic coordinates and trust scoring, and SQLite fallback for frictionless local execution.
 
 ---
 
@@ -19,12 +20,13 @@ graph TD
         UI_SOS["One-Tap SOS & Emergency Command"]
         UI_Verify["Community Feed & Verification"]
         UI_Admin["Authority Command Center"]
-        UI_Advisor["AI Route Safety Advisor"]
+        UI_Super["Super Admin Control Center"]
+        UI_Auth["Authentication & Profile Modals"]
     end
 
     subgraph APILayer ["FastAPI Core Gateway (Python 3.11+)"]
         API_Router["FastAPI REST Router"]
-        Auth_Service["Auth & Session Manager"]
+        Auth_Service["JWT Auth & Role Guard"]
         Geo_Service["Geospatial Filtering & Alerting"]
         Route_Service["Automated Agency Dispatcher"]
         SOS_Service["Emergency Alerting Service"]
@@ -38,7 +40,7 @@ graph TD
     end
 
     subgraph DataLayer ["Data & Persistence Layer (PostgreSQL)"]
-        DB_Users[(Users & Authorities Table)]
+        DB_Users[(Users, Authorities & Roles Table)]
         DB_Reports[(Reports & Geospatial Index)]
         DB_Verifications[(Community Verification Table)]
         DB_SOS[(SOS Alerts & Logs)]
@@ -50,7 +52,8 @@ graph TD
     UI_SOS <-->|REST / Live GPS| API_Router
     UI_Verify <-->|REST / JSON| API_Router
     UI_Admin <-->|REST / JSON| API_Router
-    UI_Advisor <-->|REST / JSON| API_Router
+    UI_Super <-->|REST / JSON| API_Router
+    UI_Auth <-->|REST / JSON| API_Router
 
     API_Router --> Auth_Service
     API_Router --> Geo_Service
@@ -59,72 +62,50 @@ graph TD
 
     Route_Service --> AI_Vision
     Route_Service --> AI_Embed
-    UI_Advisor --> AI_Risk
     AI_Vision -.- AI_Fallback
     AI_Embed -.- AI_Fallback
 
     Geo_Service <--> DB_Reports
     Route_Service <--> DB_Reports
-    Route_Service <--> DB_AI
     SOS_Service <--> DB_SOS
     Auth_Service <--> DB_Users
     API_Router <--> DB_Verifications
 ```
 
-### ASCII System Architecture Breakdown
+---
+
+## 3. Role-Based Access Control (RBAC) Specification
+
+Nirapod enforces strict permission boundaries across four official roles:
 
 ```
-+---------------------------------------------------------------------------------------+
-|                              CLIENT / BROWSER (Next.js 14)                            |
-|  +---------------------+   +----------------------+   +----------------------------+  |
-|  | Interactive Map UI  |   |  Direct DMB Dispatch |   |  One-Tap Emergency SOS     |  |
-|  +---------------------+   +----------------------+   +----------------------------+  |
-|  +---------------------+   +----------------------+   +----------------------------+  |
-|  | AI Route Advisor    |   | Community Feed/Verify|   |  Authority Resolution Grid |  |
-|  +---------------------+   +----------------------+   +----------------------------+  |
-+------------------------------------------+--------------------------------------------+
-                                           |  HTTP REST (JSON / Multipart)
-                                           v
-+---------------------------------------------------------------------------------------+
-|                         APPLICATION SERVER (Python FastAPI)                           |
-|                                                                                       |
-|  +--------------------+  +---------------------+  +--------------------------------+  |
-|  |  Reports Endpoint  |  |   AI Service Layer  |  | Automated Agency Routing Engine|  |
-|  +--------------------+  +---------------------+  +--------------------------------+  |
-|  +--------------------+  +---------------------+  +--------------------------------+  |
-|  |   SOS Endpoints    |  |  Verification Engine|  | Authority Dashboard Endpoints  |  |
-|  +--------------------+  +---------------------+  +--------------------------------+  |
-+------------------+-----------------------+------------------------+-------------------+
-                   |                       |                        |
-                   v                       v                        v
-+-----------------------+     +------------------------+     +--------------------------+
-|  AI EXTERNAL SERVICES |     | POSTGRESQL / SQLALCHEMY|     | EXTERNAL NOTIFICATIONS   |
-|  - Grok API (Vision)  |     | - Reports (Lat/Lng)    |     | - Disaster Mgmt Board    |
-|  - Voyage AI (Embeds) |     | - Users & Authorities  |     | - City Corporations      |
-|  - Smart Local Engine |     | - SOS Logs & Comments  |     | - Law Enforcement / 999  |
-+-----------------------+     +------------------------+     +--------------------------+
++---------------------------------------------------------------------------------------------------+
+| 1. GUEST               | Read-only access. Can view interactive map, public reports, and search.  |
+|                        | Cannot submit reports, comment, verify, use SOS, or access dashboards.   |
++---------------------------------------------------------------------------------------------------+
+| 2. CITIZEN             | Authenticated citizen. Can submit hazard/crime reports, comment, verify  |
+|                        | reports, activate Emergency SOS, and update profile. Automatically       |
+|                        | links logged-in user ID and name to submitted reports.                   |
++---------------------------------------------------------------------------------------------------+
+| 3. AUTHORITY ADMIN     | Organization accounts for DMB, DNCC, DSCC, and DMP. Can view reports     |
+|                        | assigned to their agency, update lifecycle status, attach after-repair   |
+|                        | photo proof, and check up on citizen SOS alerts.                         |
++---------------------------------------------------------------------------------------------------+
+| 4. SUPER ADMIN         | Full platform access. Can create/activate/deactivate authority accounts, |
+|                        | manage all users, view audit activity logs, and manually assign reports. |
++---------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 3. Component Details & Design Responsibilities
+## 4. Component Details & Design Responsibilities
 
-### 3.1 Frontend Presentation Layer (Next.js 14)
+### 4.1 Frontend Presentation Layer (Next.js 14)
 * **Framework:** Next.js 14 with App Router, TypeScript, and Tailwind CSS.
-* **Geospatial Visualization:** Leaflet / React-Leaflet with custom interactive SVG/HTML markers for different hazard categories (`Robbery`, `Snatching`, `Damaged Road`, `Open Drain`, `Missing Manhole Cover`, `Waterlogging`, `Poor Lighting`).
-* **Client-Side State:** React Hooks and state management for real-time filtering, alert triggers, and seamless modal dialogs.
-* **Performance:** Static generation for shell layouts, dynamic client-side hydration for Leaflet maps, and responsive mobile-first design.
+* **Authentication UI:** Comprehensive `AuthModal` supporting JWT Sign In, Citizen Registration, Password Recovery, and 1-Click Quick Demo Hackathon Accounts.
+* **Geospatial Visualization:** Leaflet / React-Leaflet with custom interactive SVG/HTML markers for different hazard categories.
 
-### 3.2 Backend Core & API Layer (Python FastAPI)
-* **Framework:** FastAPI with Pydantic v2 schemas for high-speed validation and automated OpenAPI (`/docs`) generation.
-* **ORM:** SQLAlchemy 2.0 with asynchronous pattern support, abstracting database connectivity and allowing connection pooling.
-* **Agency Routing Engine:** Evaluates report metadata (category, GPS location, DMB-direct toggle, AI severity) and automatically assigns the report to the corresponding authority agency.
-
-### 3.3 AI Intelligence Micro-Layer
-* **AI Vision & Text Analyzer:** Receives photo URLs/base64 and descriptions; uses Grok API (with simple fallback to keyword and heuristic severity models) to compute severity scores and executive summaries.
-* **Duplicate Detection:** Calculates distance vectors (Haversine formula within 100 meters) combined with text similarity to detect duplicate reports and merge community upvotes.
-* **Route Risk Prediction:** Evaluates geographic polygon risks across Dhaka and Gazipur neighborhoods, returning a synthesized safety advisory for commuters.
-
-### 3.4 Data Persistence (PostgreSQL)
-* **Schema Optimization:** Structured PostgreSQL schema with indexed latitude and longitude columns (`idx_report_coords`), category indexes, and timestamp indices for sub-millisecond query execution.
-* **Portability:** Configured via `DATABASE_URL` environment variable, supporting both PostgreSQL in production and SQLite for instant local hackathon demonstration.
+### 4.2 Backend Core & Security Layer (Python FastAPI)
+* **Framework:** FastAPI with Pydantic v2 schemas for validation and OpenAPI (`/docs`) generation.
+* **Security:** Stateless JWT bearer tokens (`pyjwt`) with direct bcrypt password hashing (`bcrypt.hashpw`).
+* **ORM:** SQLAlchemy 2.0 with PostgreSQL optimization and SQLite local fallback.

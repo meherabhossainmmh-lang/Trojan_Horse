@@ -1,80 +1,58 @@
-# Nirapod — User Flow Diagrams
+# Nirapod — Role-Based User Flow Diagrams
 
-This document outlines the end-to-end user journeys in **Nirapod** across four primary personas: Commuters, Vulnerable Citizens, Community Verifiers, and Government Authorities.
+This document outlines the end-to-end user journeys in **Nirapod** across four official authentication roles: Guest, Citizen, Authority Admin, and Super Admin.
 
 ---
 
-## 1. Commuter Journey: Interactive Map & Route Safety Advisor
+## 1. Guest Journey: Read-Only Public Map & Safe Route Exploration
 
 ```mermaid
 graph TD
-    A[Commuter Opens Nirapod App] --> B[View Live Bangladesh Map & Danger Pins]
+    A[Guest Opens Nirapod App] --> B[View Interactive Map, Pins & Proximity Alerts]
     B --> C{Action Choice}
-    C -->|Check Safe Route| D[Open AI Route Safety Advisor]
-    C -->|Enter High-Risk Zone| E[Receive Automated Danger Zone Alert]
-    D --> F[Select Origin e.g. Gazipur & Destination e.g. Uttara]
-    F --> G[AI Evaluates Route Risk Score & Hotspot Density]
-    G --> H[Display Safer Commute Recommendation]
+    C -->|Search / Filter Reports| D[View Public Report Evidence & Comments]
+    C -->|Check Safe Route| E[Open AI Route Safety Advisor]
+    C -->|Click '+ Report Hazard' or 'SOS'| F[Prompted with Login / Register Modal]
 ```
 
 ---
 
-## 2. Citizen Reporting Journey: Instant Hazard & Direct DMB Dispatch
+## 2. Citizen Journey: Registration, Hazard Reporting & Emergency SOS
 
 ```mermaid
 graph TD
-    A[Citizen Encounters Hazard or Crime Hotspot] --> B[Click 'Report Hazard' Button]
-    B --> C[Select Location on Interactive Map / Use GPS]
-    C --> D[Upload Photo & Enter Title/Description]
-    D --> E{Toggle Direct DMB Dispatch?}
-    E -->|YES - High Priority Municipal Hazard| F[Flag as Direct DMB Report]
-    E -->|NO - Standard Flow| G[Standard Category Classification]
-    F --> H[Submit Report]
-    G --> H
-    H --> I[Backend AI Multi-Modal Evaluation]
-    I --> J{Is Duplicate in 100m?}
-    J -->|YES| K[Merge & Add Community Upvote]
-    J -->|NO| L[Publish Pin on Map & Assign to Authority]
+    A[Citizen Logs In / Registers] --> B[JWT Token Issued & Stored in Session]
+    B --> C{Citizen Actions}
+    C -->|Submit Report| D[Form captures Lat/Lng, Photo & logged-in user_id]
+    C -->|Community Consensus| E[Click 'I saw this too' or post comment]
+    C -->|Emergency Danger| F[Activate SOS -> Alert DMP 999 & City Corp]
+    C -->|Profile Management| G[Update Full Name & Phone Number]
 ```
 
 ---
 
-## 3. Vulnerable Citizen Journey: One-Tap Emergency SOS
-
-```
-[ Citizen in Emergency / Robbery Danger ]
-                 |
-                 v
-   [ Taps Emergency SOS Header Button ]
-                 |
-                 v
-+----------------+----------------+
-|  EMERGENCY COMMAND MODAL OPENS  |
-+----------------+----------------+
-                 |
-                 +--------------------------------+--------------------------------+
-                 |                                |                                |
-                 v                                v                                v
-     [ Audio/Visual Siren Active ]      [ Live GPS Location Broadcast ]     [ Quick Call 999 / 1090 ]
-                 |                                |                                |
-                 +--------------------------------+--------------------------------+
-                                                  |
-                                                  v
-                              [ Authority Dashboard Flashes SOS Banner ]
-```
-
----
-
-## 4. Government Authority Journey: Resolution Tracking & Management
+## 3. Authority Admin Journey: Organization Queue & SOS Citizen Checkup
 
 ```mermaid
 graph TD
-    A[Official Logs into Authority Command Center] --> B[Filter Assigned Reports by Agency DMB/DNCC/DMP]
-    B --> C[Select Urgent Report from Queue]
-    C --> D[Review AI Executive Summary & Photo Evidence]
-    D --> E[Update Status: Under Verification -> In Progress]
-    E --> F[Deploy Field Repair / Police Team]
-    F --> G[Upload After-Repair Evidence Photo & Notes]
-    G --> H[Mark Status: Resolved]
-    H --> I[Public Map Updates Status to Resolved in Green]
+    A[Authority Official Logs In e.g. DMB / DNCC / DSCC / DMP] --> B[Open Authority Command Center]
+    B --> C[Queue Automatically Filters to Assigned Agency Code]
+    C --> D{Authority Actions}
+    D -->|Update Lifecycle| E[Move Status: Submitted -> In Progress -> Resolved]
+    E --> F[Attach Mandatory After-Repair Photo Proof & Engineering Notes]
+    D -->|SOS Oversight| G[Send Real-Time Safety Checkup Prompt to Citizen]
+```
+
+---
+
+## 4. Super Admin Journey: Platform Governance & Authority Account Management
+
+```mermaid
+graph TD
+    A[Super Admin Logs In superadmin@nirapod.bd] --> B[Access Super Admin Control Center]
+    B --> C{Governance Actions}
+    C -->|Create Authority| D[Register new agency account DMB / DNCC / DSCC / DMP]
+    C -->|User Management| E[Activate or Deactivate User / Authority accounts]
+    C -->|Audit Logs| F[Monitor real-time system activity & telemetry logs]
+    C -->|Manual Assignment| G[Re-assign hazard reports across authority agencies]
 ```
