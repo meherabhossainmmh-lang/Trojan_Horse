@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db, engine, Base
@@ -10,19 +11,9 @@ from datetime import datetime, timedelta
 router = APIRouter(prefix="/seed", tags=["Database Seeding"])
 
 def seed_database_data(db: Session):
-    # Create tables if not exist
+    # Recreate tables cleanly for schema upgrades
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-
-    # Check if agencies already exist
-    if db.query(AuthorityAgency).count() > 0:
-        # Clear existing reports for clean demo reset
-        db.query(ReportVerification).delete()
-        db.query(ReportComment).delete()
-        db.query(AIAnalysisLog).delete()
-        db.query(Report).delete()
-        db.query(SOSAlert).delete()
-        db.query(AuthorityAgency).delete()
-        db.commit()
 
     agencies = [
         AuthorityAgency(
@@ -220,21 +211,34 @@ def seed_database_data(db: Session):
                 )
             )
 
-    # Seed an active SOS alert for demo
+    # Seed an active SOS alert with inter-agency checkup workflow
+    sample_sos_msgs = [
+        {
+            "sender": "DNCC Control Room",
+            "message": "Hello Nusrat, this is DNCC Control Room. We see your SOS alert. Has DMP Police 999 patrol unit arrived at Panthapath Signal?",
+            "timestamp": (datetime.utcnow() - timedelta(minutes=10)).isoformat(),
+        }
+    ]
     sample_sos = SOSAlert(
-        user_name="Nusrat Jahan (Student)",
+        user_name="Nusrat Jahan (Student Commuter)",
         phone_number="01711-234567",
         latitude=23.7505,
         longitude=90.3800,
         address="Near Panthapath Signal, Dhaka",
         status="active",
         notified_agency="DMP Police 999 & DMB 1090",
+        dmp_status="Notified — Awaiting Police Dispatch",
+        city_corp_oversight_status="Status Requested from User",
+        city_corp_notes="DNCC Control Room monitoring DMP police dispatch and requesting safety verification from user.",
+        user_action_feedback="Pending",
+        assigned_city_corp="DNCC",
+        messages_json=json.dumps(sample_sos_msgs),
         created_at=datetime.utcnow() - timedelta(minutes=15),
     )
     db.add(sample_sos)
 
     db.commit()
-    return {"message": "Database seeded successfully with 8 realistic Bangladesh reports across all lifecycle states, 4 authorities, and 1 active emergency SOS alert!"}
+    return {"message": "Database seeded successfully with 8 realistic Bangladesh reports across all lifecycle states, 4 authorities, and 1 active emergency SOS alert with Inter-Agency Oversight!"}
 
 @router.post("")
 def trigger_seed(db: Session = Depends(get_db)):

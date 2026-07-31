@@ -11,12 +11,20 @@ import {
   FileCheck,
   RefreshCw,
   Sparkles,
+  Radio,
+  PhoneCall,
+  MessageSquare,
+  Send,
+  Loader2,
 } from "lucide-react";
 import {
   Report,
   updateReportStatus,
   fetchDashboardStats,
-  fetchReports,
+  fetchActiveSOS,
+  requestCityCorpCheckup,
+  updateSosDmpStatus,
+  SOSAlert,
 } from "@/lib/api";
 
 interface AuthorityDashboardProps {
@@ -32,13 +40,18 @@ export default function AuthorityDashboard({
 }: AuthorityDashboardProps) {
   const [selectedAgency, setSelectedAgency] = useState<string>("ALL");
   const [stats, setStats] = useState<any>(null);
+  const [activeSos, setActiveSos] = useState<SOSAlert[]>([]);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [statusInput, setStatusInput] = useState<string>("In Progress");
   const [notesInput, setNotesInput] = useState<string>("");
   const [afterPhotoInput, setAfterPhotoInput] = useState<string>("");
+  const [customMsgInput, setCustomMsgInput] = useState<string>("");
+  const [selectedSosId, setSelectedSosId] = useState<number | null>(null);
+  const [actionLoading, setActionLoading] = useState<boolean>(false);
 
   useEffect(() => {
     loadStats();
+    loadActiveSos();
   }, [reports]);
 
   const loadStats = async () => {
@@ -47,6 +60,15 @@ export default function AuthorityDashboard({
       setStats(data);
     } catch (err) {
       console.error("Failed to fetch dashboard stats:", err);
+    }
+  };
+
+  const loadActiveSos = async () => {
+    try {
+      const sosData = await fetchActiveSOS();
+      setActiveSos(sosData);
+    } catch (err) {
+      console.error("Failed to fetch active sos:", err);
     }
   };
 
@@ -66,6 +88,49 @@ export default function AuthorityDashboard({
     } catch (err) {
       console.error("Failed to update status:", err);
       alert("Error updating report status.");
+    }
+  };
+
+  const handleCityCorpAction = async (
+    sosId: number,
+    actionType: "request_status" | "escalate" | "send_message",
+    msg?: string
+  ) => {
+    setActionLoading(true);
+    try {
+      await requestCityCorpCheckup(sosId, actionType, msg);
+      await loadActiveSos();
+      if (actionType === "request_status") {
+        alert(
+          "Safety verification request sent to citizen! Awaiting user feedback."
+        );
+      } else if (actionType === "escalate") {
+        alert(
+          "Priority escalation flagged to DMP Police Headquarters Control Room!"
+        );
+      } else {
+        alert("Message sent to citizen's SOS thread!");
+      }
+      setCustomMsgInput("");
+      setSelectedSosId(null);
+    } catch (err) {
+      console.error("City Corp action error:", err);
+      alert("Error sending checkup.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDmpAction = async (sosId: number, status: string) => {
+    setActionLoading(true);
+    try {
+      await updateSosDmpStatus(sosId, status);
+      await loadActiveSos();
+      alert(`DMP Police status updated to: ${status}`);
+    } catch (err) {
+      console.error("DMP action error:", err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -144,6 +209,200 @@ export default function AuthorityDashboard({
           </div>
         </div>
       </div>
+
+      {/* NEW: INTER-AGENCY EMERGENCY SOS & CITY CORP OVERSIGHT PANEL */}
+      {activeSos.length > 0 && (
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-rose-950/60 via-slate-900 to-slate-900 border-2 border-rose-500/50 shadow-2xl space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rose-900/50 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-rose-600 text-white shadow">
+                <Radio className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-black text-white">
+                    EMERGENCY SOS &amp; INTER-AGENCY ACCOUNTABILITY CENTER
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-600 text-white">
+                    DMP + CITY CORP OVERSIGHT
+                  </span>
+                </div>
+                <p className="text-xs text-rose-300">
+                  City Corporations check if DMP Police is taking action &amp; request status verification from the citizen
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={loadActiveSos}
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-rose-300 border border-rose-500/30"
+            >
+              Refresh SOS Telemetry
+            </button>
+          </div>
+
+          {/* Active SOS Cards in Dashboard */}
+          <div className="space-y-4">
+            {activeSos.map((sos) => (
+              <div
+                key={sos.id}
+                className="p-4 rounded-xl bg-slate-950 border border-rose-900/60 space-y-3"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-black text-white">
+                      {sos.user_name}
+                    </span>
+                    <span className="text-xs font-bold text-rose-400">
+                      ({sos.phone_number})
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300">
+                      {sos.assigned_city_corp || "DNCC"} OVERSIGHT
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`tel:${sos.phone_number}`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white shadow"
+                    >
+                      <PhoneCall className="w-3.5 h-3.5" />
+                      <span>Call Citizen</span>
+                    </a>
+
+                    <button
+                      onClick={() =>
+                        handleCityCorpAction(
+                          sos.id,
+                          "request_status",
+                          `Hello ${sos.user_name}, ${
+                            sos.assigned_city_corp || "DNCC"
+                          } Control Room is checking on your safety after your SOS alert. Has DMP Police 999 patrol unit reached your location?`
+                        )
+                      }
+                      disabled={actionLoading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white shadow"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>Request Action Status from User</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleCityCorpAction(sos.id, "escalate")
+                      }
+                      disabled={actionLoading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-bold text-white shadow"
+                    >
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      <span>Escalate to DMP Headquarters</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+                  <div>
+                    <span className="text-slate-400 font-semibold">
+                      👮 DMP Police Status:
+                    </span>
+                    <div className="font-bold text-rose-400 mt-0.5">
+                      {sos.dmp_status ||
+                        "Notified — Awaiting Police Dispatch"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-400 font-semibold">
+                      🏛️ City Corp Oversight:
+                    </span>
+                    <div className="font-bold text-emerald-400 mt-0.5">
+                      {sos.city_corp_oversight_status ||
+                        "Status Requested from User"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-400 font-semibold">
+                      👤 Citizen Action Feedback:
+                    </span>
+                    <div className="font-bold text-amber-300 mt-0.5">
+                      {sos.user_action_feedback || "Pending"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* DMP Quick Action Buttons */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-bold text-slate-400">
+                      DMP Police Actions:
+                    </span>
+                    <button
+                      onClick={() =>
+                        handleDmpAction(
+                          sos.id,
+                          "Patrol Car Dispatched (ETA 4 min)"
+                        )
+                      }
+                      className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200"
+                    >
+                      🚓 Mark Patrol Dispatched
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDmpAction(
+                          sos.id,
+                          "Arrived & Action Taken"
+                        )
+                      }
+                      className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs font-bold text-emerald-400"
+                    >
+                      👮 Mark Police Arrived &amp; Action Taken
+                    </button>
+                  </div>
+
+                  {/* Send Custom Message Button */}
+                  <button
+                    onClick={() =>
+                      setSelectedSosId(
+                        selectedSosId === sos.id ? null : sos.id
+                      )
+                    }
+                    className="text-xs font-bold text-emerald-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>💬 Message User Thread</span>
+                  </button>
+                </div>
+
+                {/* Message Box Input */}
+                {selectedSosId === sos.id && (
+                  <div className="flex items-center gap-2 pt-2">
+                    <input
+                      type="text"
+                      value={customMsgInput}
+                      onChange={(e) => setCustomMsgInput(e.target.value)}
+                      placeholder="Type custom checkup message to citizen..."
+                      className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+                    />
+                    <button
+                      onClick={() =>
+                        handleCityCorpAction(
+                          sos.id,
+                          "send_message",
+                          customMsgInput
+                        )
+                      }
+                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white flex items-center gap-1"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Send</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Agency Tabs & Refresh */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-3 rounded-2xl border border-slate-800">
@@ -276,6 +535,7 @@ export default function AuthorityDashboard({
                         onChange={(e) => setStatusInput(e.target.value)}
                         className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                       >
+                        <option value="Submitted">Submitted</option>
                         <option value="Received">Received</option>
                         <option value="Under Verification">
                           Under Verification

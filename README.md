@@ -17,8 +17,8 @@ In urban centers across Bangladesh—such as Dhaka, Gazipur, and Chattogram—co
 **Nirapod** (**নিরাপদ** / *Safe*) is an end-to-end, community-driven, AI-empowered platform that bridges this gap. It provides:
 * **Interactive Crime Hotspot & Hazard Mapping** with real-time **Danger Zone Alerts** and **Proximity Warnings**.
 * **AI Smart Authority Routing** (Disaster Management Board, City Corporations, and Metropolitan Police).
+* **Inter-Agency Emergency SOS Accountability & Oversight** where City Corporations monitor Metropolitan Police (DMP 999) response and check on citizen safety.
 * **Direct Disaster Management Board (DMB) Dispatch** for high-priority infrastructure emergencies.
-* **One-Tap Emergency SOS Command** with live GPS location sharing.
 * **Full Lifecycle Resolution Tracking** across all 5 official states: `Submitted` -> `Received` -> `Under Verification` -> `In Progress` -> `Resolved`.
 
 ---
@@ -30,7 +30,7 @@ Review our complete engineering documentation in the `docs/` folder:
 * [**Project Idea & Executive Summary**](docs/PROJECT_IDEA.md) — Why Nirapod wins, problem analysis, value proposition, and target audiences.
 * [**3–5 Minute Presentation & Live Demo Script**](docs/DEMO_WALKTHROUGH.md) — Step-by-step hackathon judging script and walkthrough.
 * [**System Architecture & Design**](docs/SYSTEM_ARCHITECTURE.md) — High-level architecture, Mermaid & ASCII diagrams, Next.js + FastAPI + PostgreSQL stack breakdown.
-* [**Workflow Diagrams**](docs/WORKFLOW_DIAGRAM.md) — Automated hazard reporting, Direct DMB Dispatch, SOS command, and community verification workflows.
+* [**Workflow Diagrams**](docs/WORKFLOW_DIAGRAM.md) — Automated hazard reporting, Direct DMB Dispatch, Inter-Agency SOS oversight, and community verification workflows.
 * [**Database (ER) Diagram & PostgreSQL Schema**](docs/DATABASE_ER_DIAGRAM.md) — Relational ER diagrams, table specifications, geospatial indexes, and performance strategy.
 * [**AI Pipeline Architecture**](docs/AI_PIPELINE.md) — Multi-modal Grok API vision/text evaluation, Voyage AI duplicate detection, AI Route Safety Advisor, and fallback heuristic engine.
 * [**User Flow Diagrams**](docs/USER_FLOW.md) — Step-by-step journeys for Commuters, Citizens, Vulnerable Groups, and Government Authorities.
@@ -46,10 +46,10 @@ Review our complete engineering documentation in the `docs/` folder:
 | **2. Citizen Reporting System** | ✅ | Fast photo upload, GPS latitude/longitude selection, title, description, and real-time AI category assistant. |
 | **3. Smart Authority Routing** | ✅ | Rule-based & AI-assisted dispatch to DMB, Dhaka North/South City Corporations (DNCC/DSCC), or Police (DMP). |
 | **4. Real-Time Public Alerts** | ✅ | **Simulated Commuter Proximity Alert Modal** warning users approaching high-risk snatching or drainage danger zones. |
-| **5. Emergency SOS Module** | ✅ | One-tap SOS command with audio/visual siren, live GPS location sharing, and one-touch dial for 999 & 1090. |
+| **5. Emergency SOS Module** | ✅ | Simultaneous alert to DMP 999 & City Corp with **Inter-Agency Oversight** (City Corp checks on citizen & DMP response). |
 | **6. Community Verification** | ✅ | Citizen upvoting ("I saw this too"), false-report flagging, and dynamic AI-assisted Trust Score (0-100). |
 | **7. Resolution Tracking** | ✅ | Complete 5-stage lifecycle tracking: `Submitted` -> `Received` -> `Under Verification` -> `In Progress` -> `Resolved`. |
-| **8. Authority Dashboard** | ✅ | Official command center for DMB, DNCC, DSCC, and DMP with status updates and after-repair photo uploads. |
+| **8. Authority Dashboard** | ✅ | Official command center for DMB, DNCC, DSCC, and DMP with status updates, SOS checkups, and after-repair photo uploads. |
 | **9. AI-Assisted Features** | ✅ | Grok API Vision/NLP severity scoring, Voyage AI semantic duplicate clustering, and AI Route Safety Advisor. |
 
 ---
@@ -98,7 +98,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Reset and seed 8 realistic Bangladesh demo reports across all 5 lifecycle states
+# Reset and seed 8 realistic Bangladesh demo reports across all 5 lifecycle states + Inter-Agency SOS
 python3 seed.py
 
 # Launch FastAPI server on port 8000

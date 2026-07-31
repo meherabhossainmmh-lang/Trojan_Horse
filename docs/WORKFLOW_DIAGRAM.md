@@ -1,6 +1,6 @@
 # Nirapod — Workflow Diagrams & Operational Pipelines
 
-This document details the operational workflows of the **Nirapod** platform, illustrating how data flows from citizen submission to authority resolution, community verification, and emergency SOS handling.
+This document details the operational workflows of the **Nirapod** platform, illustrating how data flows from citizen submission to authority resolution, community verification, and inter-agency emergency SOS oversight.
 
 ---
 
@@ -29,7 +29,7 @@ sequenceDiagram
         API-->>UI: 200 OK (Merged with existing verified report)
     else Is New Unique Hazard
         API->>API: Execute Automated Agency Routing Rule
-        API->>DB: INSERT Report (Status: Received, Assigned Agency ID)
+        API->>DB: INSERT Report (Status: Submitted, Assigned Agency ID)
         API-->>UI: 201 Created (Report published on Interactive Map)
         API->>Auth: Notify assigned authority dashboard in real-time
     end
@@ -38,8 +38,6 @@ sequenceDiagram
 ---
 
 ## 2. Direct Disaster Management Board (DMB) Dispatch Workflow
-
-The Problem Statement specifically requires users to be able to send a picture of a hazard along with a short written description straight to the **Disaster Management Board (DMB)** so damaged infrastructure gets flagged with clear visual and contextual evidence.
 
 ```
 [ Citizen Toggles "Direct DMB Dispatch" ]
@@ -69,30 +67,38 @@ The Problem Statement specifically requires users to be able to send a picture o
 
 ---
 
-## 3. One-Tap Emergency SOS Command Workflow
+## 3. Inter-Agency Emergency SOS Oversight & Cross-Verification Workflow
+
+Nirapod solves police delay and bureaucratic inaction by broadcasting Emergency SOS alerts to **both Metropolitan Police (DMP 999)** and **City Corporations (DNCC / DSCC)** simultaneously. City Corporations act as an oversight agency, monitoring police response and checking on citizen safety in real time.
 
 ```mermaid
-stateDiagram-v2
-    [*] --> SOS_Triggered: User taps Emergency SOS button
-    SOS_Triggered --> Location_Acquired: Fetch live GPS coordinates (Lat/Lng)
-    Location_Acquired --> Alert_Broadcasted: POST /api/sos (Emergency Payload)
+sequenceDiagram
+    autonumber
+    actor Citizen as Vulnerable Citizen / Student
+    participant API as FastAPI Gateway
+    participant DMP as Metropolitan Police (999)
+    participant DNCC as City Corp Control Room (DNCC / DSCC)
+
+    Citizen->>API: POST /api/sos (Live GPS Broadcast)
+    API->>DMP: Alert Police Control Room (dmp_status: "Notified")
+    API->>DNCC: Alert City Corp Oversight (city_corp_oversight: "Status Requested")
     
-    state Alert_Broadcasted {
-        [*] --> Notify_Dispatch: Send alert to Police (999) & DMB (1090)
-        [*] --> Activate_Siren: Trigger audio/visual alert on user device
-        [*] --> Log_Database: Record timestamped SOS in PostgreSQL
-    }
+    DNCC->>Citizen: Send In-App Safety Checkup Prompt ("Has Police 999 Arrived?")
     
-    Alert_Broadcasted --> Live_Tracking: User shares live coordinates
-    Live_Tracking --> SOS_Resolved: User or Authority marks SOS as Resolved
-    SOS_Resolved --> [*]
+    alt Police Patrol Arrived & Active
+        Citizen->>API: PATCH /user-feedback ("Yes, Police Arrived & Taking Action")
+        API->>DNCC: Mark Oversight: "Verified DMP Action"
+        API->>DMP: Update dmp_status: "Arrived & Action Taken"
+    else Police Delayed / No Response
+        Citizen->>API: PATCH /user-feedback ("No, Police Not Arrived Yet — Escalate!")
+        API->>DNCC: Mark Oversight: "Escalated to DMP Headquarters"
+        DNCC->>DMP: Send Urgent Escalation Alert to DMP Command Room
+    end
 ```
 
 ---
 
 ## 4. Community Verification & Trust Score Lifecycle
-
-To maintain trustworthy and current information, Nirapod incorporates a community consensus mechanism that dynamically updates a report's `ai_trust_score`.
 
 ```
                         +-------------------------------+

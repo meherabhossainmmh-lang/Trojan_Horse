@@ -5,7 +5,7 @@ const API_BASE_URL =
 
 const client = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 3000, // Fast fallback timeout if server is offline
+  timeout: 3000,
 });
 
 export interface Comment {
@@ -39,6 +39,12 @@ export interface Report {
   comments: Comment[];
 }
 
+export interface SOSMessage {
+  sender: string;
+  message: string;
+  timestamp: string;
+}
+
 export interface SOSAlert {
   id: number;
   user_name: string;
@@ -48,6 +54,12 @@ export interface SOSAlert {
   address: string;
   status: string;
   notified_agency: string;
+  dmp_status: string;
+  city_corp_oversight_status: string;
+  city_corp_notes?: string;
+  user_action_feedback: string;
+  assigned_city_corp: string;
+  messages: SOSMessage[];
   created_at: string;
 }
 
@@ -70,8 +82,6 @@ export interface RouteRiskResponse {
 
 // ============================================================================
 // STANDALONE / DEMO FALLBACK ENGINE
-// Guarantees that even if the Python FastAPI backend is not running on port 8000,
-// the entire application remains 100% functional using browser localStorage.
 // ============================================================================
 
 const DEFAULT_DEMO_REPORTS: Report[] = [
@@ -278,13 +288,27 @@ const DEFAULT_DEMO_REPORTS: Report[] = [
 const DEFAULT_DEMO_SOS: SOSAlert[] = [
   {
     id: 1,
-    user_name: "Nusrat Jahan (Student)",
+    user_name: "Nusrat Jahan (Student Commuter)",
     phone_number: "01711-234567",
     latitude: 23.7505,
     longitude: 90.38,
     address: "Near Panthapath Signal, Dhaka",
     status: "active",
     notified_agency: "DMP Police 999 & DMB 1090",
+    dmp_status: "Notified — Awaiting Police Dispatch",
+    city_corp_oversight_status: "Status Requested from User",
+    city_corp_notes:
+      "DNCC Control Room monitoring DMP police dispatch and requesting safety verification from user.",
+    user_action_feedback: "Pending",
+    assigned_city_corp: "DNCC",
+    messages: [
+      {
+        sender: "DNCC Control Room",
+        message:
+          "Hello Nusrat, this is DNCC Control Room. We see your SOS alert. Has DMP Police 999 patrol unit arrived at Panthapath Signal?",
+        timestamp: new Date(Date.now() - 600000).toISOString(),
+      },
+    ],
     created_at: new Date(Date.now() - 900000).toISOString(),
   },
 ];
@@ -325,7 +349,7 @@ const saveLocalSOS = (alerts: SOSAlert[]) => {
 };
 
 // ============================================================================
-// API METHODS (With Auto-Fallback to Standalone Storage)
+// API METHODS
 // ============================================================================
 
 export const fetchReports = async (params?: {
@@ -567,6 +591,7 @@ export const triggerSOS = async (data: {
     return res.data;
   } catch (err) {
     const alerts = getLocalSOS();
+    const corp = data.latitude >= 23.78 ? "DNCC" : "DSCC";
     const newAlert: SOSAlert = {
       id: Date.now() % 10000,
       user_name: data.user_name || "Citizen Commuter",
@@ -576,6 +601,18 @@ export const triggerSOS = async (data: {
       address: data.address || "Live GPS Coordinate",
       status: "active",
       notified_agency: "National 999 & DMB Helpline 1090",
+      dmp_status: "Notified — Awaiting Police Dispatch",
+      city_corp_oversight_status: "Status Requested from User",
+      city_corp_notes: `${corp} Control Room monitoring DMP police dispatch and requesting safety verification.`,
+      user_action_feedback: "Pending",
+      assigned_city_corp: corp,
+      messages: [
+        {
+          sender: `${corp} Control Room`,
+          message: `SOS broadcast received at ${corp}. We are monitoring DMP Police dispatch and requesting real-time action status from you.`,
+          timestamp: new Date().toISOString(),
+        },
+      ],
       created_at: new Date().toISOString(),
     };
     saveLocalSOS([newAlert, ...alerts]);
@@ -592,6 +629,140 @@ export const fetchActiveSOS = async (): Promise<SOSAlert[]> => {
   }
 };
 
+export const updateSosDmpStatus = async (
+  id: number,
+  dmpStatus: string
+): Promise<SOSAlert> => {
+  try {
+    const res = await client.patch(`/sos/${id}/dmp-status`, {
+      dmp_status: dmpStatus,
+    });
+    return res.data;
+  } catch (err) {
+    const alerts = getLocalSOS();
+    let updatedAlert: SOSAlert | null = null;
+    const updated = alerts.map((a) => {
+      if (a.id === id) {
+        updatedAlert = {
+          ...a,
+          dmp_status: dmpStatus,
+          messages: [
+            ...a.messages,
+            {
+              sender: "DMP Police Dispatch 999",
+              message: `Police status updated to: ${dmpStatus}`,
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        };
+        return updatedAlert;
+      }
+      return a;
+    });
+    saveLocalSOS(updated);
+    if (!updatedAlert) throw new Error("SOS alert not found");
+    return updatedAlert;
+  }
+};
+
+export const requestCityCorpCheckup = async (
+  id: number,
+  actionType: "request_status" | "escalate" | "send_message",
+  messageText?: string
+): Promise<SOSAlert> => {
+  try {
+    const res = await client.patch(`/sos/${id}/city-corp-checkup`, {
+      action_type: actionType,
+      message_text: messageText,
+    });
+    return res.data;
+  } catch (err) {
+    const alerts = getLocalSOS();
+    let updatedAlert: SOSAlert | null = null;
+    const updated = alerts.map((a) => {
+      if (a.id === id) {
+        let oversightStatus = a.city_corp_oversight_status;
+        let newMsg = messageText || "";
+        if (actionType === "request_status") {
+          oversightStatus = "Status Requested from User";
+          newMsg =
+            messageText ||
+            `Hello ${a.user_name}, ${a.assigned_city_corp} Control Room is checking on your safety. Has DMP Police arrived at your coordinate?`;
+        } else if (actionType === "escalate") {
+          oversightStatus = "Escalated to DMP Headquarters";
+          newMsg =
+            messageText ||
+            `${a.assigned_city_corp} flagged priority escalation to DMP Headquarters: Immediate patrol verification required.`;
+        }
+        updatedAlert = {
+          ...a,
+          city_corp_oversight_status: oversightStatus,
+          messages: [
+            ...a.messages,
+            {
+              sender: `${a.assigned_city_corp} Control Room`,
+              message: newMsg,
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        };
+        return updatedAlert;
+      }
+      return a;
+    });
+    saveLocalSOS(updated);
+    if (!updatedAlert) throw new Error("SOS alert not found");
+    return updatedAlert;
+  }
+};
+
+export const submitUserSosFeedback = async (
+  id: number,
+  feedback: "Police Arrived & Taking Action" | "Police Not Arrived Yet — Require Immediate Follow-up"
+): Promise<SOSAlert> => {
+  try {
+    const res = await client.patch(`/sos/${id}/user-feedback`, {
+      feedback,
+    });
+    return res.data;
+  } catch (err) {
+    const alerts = getLocalSOS();
+    let updatedAlert: SOSAlert | null = null;
+    const updated = alerts.map((a) => {
+      if (a.id === id) {
+        let newDmp = a.dmp_status;
+        let newOversight = a.city_corp_oversight_status;
+        if (feedback.includes("Arrived") && !feedback.includes("Not")) {
+          newDmp = "Arrived & Action Taken";
+          newOversight = "Verified DMP Action";
+        } else if (feedback.includes("Not Arrived")) {
+          newDmp = "No Response Yet — Escalated";
+          newOversight = "Escalated to DMP Headquarters";
+        }
+        updatedAlert = {
+          ...a,
+          dmp_status: newDmp,
+          city_corp_oversight_status: newOversight,
+          user_action_feedback: feedback,
+          messages: [
+            ...a.messages,
+            {
+              sender: `Citizen (${a.user_name})`,
+              message: `Action Status Feedback: ${feedback}`,
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        };
+        return updatedAlert;
+      }
+      return a;
+    });
+    saveLocalSOS(updated);
+    if (!updatedAlert) throw new Error("SOS alert not found");
+    return updatedAlert;
+  }
+};
+
 export const resolveSOSAlert = async (id: number): Promise<SOSAlert> => {
   try {
     const res = await client.patch(`/sos/${id}/resolve`);
@@ -601,7 +772,12 @@ export const resolveSOSAlert = async (id: number): Promise<SOSAlert> => {
     let resolved: SOSAlert | null = null;
     const updated = alerts.map((a) => {
       if (a.id === id) {
-        resolved = { ...a, status: "resolved" };
+        resolved = {
+          ...a,
+          status: "resolved",
+          dmp_status: "Resolved",
+          city_corp_oversight_status: "Verified Safe",
+        };
         return resolved;
       }
       return a;

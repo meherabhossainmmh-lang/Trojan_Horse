@@ -23,6 +23,7 @@ While citizens frequently capture photos of these dangers on social media, those
 |  [Citizen Encounters Hazard] ---> [Posts on Facebook/X] ---> [Lost in Algorithm / Unverified]       |
 |  [Commuter Walks Route]      ---> [No Prior Warning]    ---> [Enters Robbery/Snatching Zone]      |
 |  [Open Manhole / Drain]      ---> [No Direct Channel]   ---> [DMB & City Corp Unaware / Delayed]  |
+|  [Emergency SOS Triggered]   ---> [Single Agency Loop]  ---> [No Oversight / Response Delayed]    |
 +---------------------------------------------------------------------------------------------------+
                                                  ||
                                                  ||  TRANSFORMED BY NIRAPOD
@@ -33,7 +34,7 @@ While citizens frequently capture photos of these dangers on social media, those
 |  [Citizen Reports Hazard]    ---> [AI Multi-Modal Verification] ---> [Auto-Routed to Authority]   |
 |  [Commuter Plans Commute]    ---> [AI Safe Route Advisor]       ---> [Real-Time Danger Zone Alert]|
 |  [Direct DMB Dispatch]       ---> [Photo + Context Evidence]    ---> [Instant Board Flagging]     |
-|  [Emergency SOS Trigger]     ---> [Live GPS & Sound Siren]      ---> [Emergency Contact / 999]    |
+|  [Emergency SOS Trigger]     ---> [DMP Police 999 Dispatch]     ---> [City Corp Oversight Check]  |
 +---------------------------------------------------------------------------------------------------+
 ```
 
@@ -46,22 +47,25 @@ While citizens frequently capture photos of these dangers on social media, those
 * **Infrastructure Hazards:** Geo-tagged reporting of open manholes, damaged asphalt, uncovered drains, and electrical hazards.
 * **Danger Zone Alerts:** Automated visual and auditory warnings when a commuter approaches or queries a high-risk perimeter.
 
-### II. AI-Powered Verification & Intelligent Routing (Highest Priority Feature)
+### II. AI-Powered Verification & Smart Authority Routing (Highest Priority Feature)
 * **Multi-Modal AI Analyzer (Grok API & OpenAI-Compatible Vision):** Evaluates uploaded photos and descriptions to assign a standardized **Severity Score (1-100)** and generate a concise executive summary for government engineers and responders.
-* **Intelligent Agency Dispatch:** Automatically routes verified hazards to the correct authority:
+* **Smart Authority Routing:** Automatically routes verified hazards to the correct authority:
   * **Disaster Management Board (DMB):** Flooding, major structural failures, open manholes, and critical drainage hazards.
   * **City Corporations (DNCC / DSCC / GCC):** Road repairs, street lighting, municipal infrastructure.
   * **Metropolitan Police / Law Enforcement:** Active crime hotspots and snatching zones.
 * **Duplicate Detection via Vector Embeddings (Voyage AI):** Prevents spam and duplicate reporting by clustering reports within a 100-meter radius using semantic and geospatial similarity.
 
-### III. Direct DMB Dispatch Channel
+### III. Inter-Agency Emergency SOS Accountability & Oversight (DMP vs. City Corporations)
+* When a citizen triggers an **Emergency SOS**, the alert broadcasts simultaneously to **Metropolitan Police (DMP 999)** and the **City Corporation (DNCC / DSCC)**.
+* **City Corporation Oversight:** City Corporations monitor whether DMP Police has dispatched a patrol car or is taking action.
+* **Real-Time Citizen Safety Checkup:** City Corporation officials can send an in-app checkup prompt, SMS message, or call the citizen directly to check if police have arrived.
+* **Citizen Feedback Loop:** The citizen can click **"Yes, DMP Police Arrived & Taking Action"** or **"No, Police Not Arrived Yet — Escalate!"**, which triggers an automatic priority escalation to DMP Headquarters if police response is delayed.
+
+### IV. Direct DMB Dispatch Channel
 * Dedicated high-priority pipeline allowing citizens to submit a photo with contextual evidence straight to the **Disaster Management Board**, ensuring critical municipal hazards bypass bureaucracy and receive immediate attention.
 
-### IV. One-Tap Emergency SOS & Live Location Command
-* Instantaneous SOS trigger for vulnerable citizens in danger, activating an audio-visual emergency beacon, sharing live GPS coordinates, and displaying one-touch access to National Emergency Service 999 and DMB Helpline 1090.
-
 ### V. Complete Lifecycle Tracking & Community Trust
-* **End-to-End Resolution Tracking:** Every report progresses transparently through `Received` -> `Under Verification` -> `Assigned to Authority` -> `In Progress` -> `Resolved` (accompanied by after-repair photographic proof).
+* **End-to-End Resolution Tracking:** Every report progresses transparently through `Submitted` -> `Received` -> `Under Verification` -> `In Progress` -> `Resolved` (accompanied by after-repair photographic proof).
 * **Community Consensus & Trust Score:** Citizens confirm reports ("I saw this too"), upvote valid alerts, and flag inaccuracies, generating a dynamic community trust score.
 
 ---
@@ -76,8 +80,8 @@ While citizens frequently capture photos of these dangers on social media, those
 | 2. VULNERABLE GROUPS       | Women, children, and elderly citizens disproportionately affected by |
 |                            | snatching, dimly lit streets, and delayed emergency response.        |
 +---------------------------------------------------------------------------------------------------+
-| 3. GOVERNMENT AUTHORITIES  | Disaster Management Board and City Corporations who require          |
-|                            | organized, GPS-verified, AI-prioritized data to deploy repair teams. |
+| 3. GOVERNMENT AUTHORITIES  | Disaster Management Board, City Corporations, and Metropolitan       |
+|                            | Police who require organized, GPS-verified, AI-prioritized data.     |
 +---------------------------------------------------------------------------------------------------+
 ```
 
@@ -87,5 +91,5 @@ While citizens frequently capture photos of these dangers on social media, those
 
 1. **Production-Ready Polish:** Clean, modern, responsive Next.js 14 UI/UX paired with a robust Python FastAPI + PostgreSQL backend.
 2. **Deep AI Value Addition:** Not a superficial chatbot—AI is embedded directly into automated hazard classification, severity scoring, duplicate suppression, and route safety advisory.
-3. **True to Bangladesh's Context:** Custom-designed around Dhaka and Gazipur geography, local governance structures (DMB, City Corporations), and real commuter challenges.
+3. **Inter-Agency Accountability:** Solves the classic problem of government agencies passing the buck by giving City Corporations real-time oversight over DMP Police SOS response.
 4. **Complete Problem Statement Fulfillment:** Every single requirement—from Crime Hotspot Mapping, DMB Direct Notification, SOS Trigger, Community Verification, to Lifecycle Resolution Tracking—is architected and executed to the highest engineering standard.
