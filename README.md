@@ -41,7 +41,7 @@ Citizens across Bangladesh face preventable safety risks daily — robberies, sn
 
 Nirapod Path is a three-panel web platform connecting citizens, city management teams, and city corporations in a single accountability chain:
 
-- **Citizens** report crime hotspots and infrastructure hazards on an interactive map, with photo evidence and GPS location.
+- **Citizens** report crime hotspots and infrastructure hazards on an interactive map, with photo evidence and GPS location. (Citizen sign-in is **100% optional** so anyone can report danger immediately).
 - **Management panels** (one per City Corporation) review and resolve reports.
 - **City Corporation panels** hold final authority — they can move a report to any status, add remarks, and issue the final **verified** stamp, giving the public a trustworthy, government-backed confirmation.
 
@@ -66,7 +66,7 @@ Every report is scoped to the City Corporation the citizen selects (`DNCC`, `DSC
 | ------------------------------------------ | :--: | :--: | :---------: | :--------------: | :---------: |
 | View public Hotspot Map &amp; reports      |  ✅  |  ✅  |     ✅      |        ✅        |     ✅      |
 | Register / log in                          |  ✅  |  ✅  |  ✅ (seeded) |    ✅ (seeded)   |  ✅ (seeded) |
-| Create a report / trigger Emergency SOS    |  ❌  |  ✅  |     ❌      |        ❌        |     ✅      |
+| Create a report / trigger Emergency SOS    |  ✅  |  ✅  |     ❌      |        ❌        |     ✅      |
 | View personal Citizen Dashboard            |  ❌  |  ✅  |      —      |        —         |     ✅      |
 | View reports for their assigned Agency     |  ❌  |  ❌  |     ✅      |        ✅        |     ✅      |
 | Set status: `under_review → resolved`      |  ❌  |  ❌  |     ✅      |        ✅        |     ✅      |
@@ -74,7 +74,7 @@ Every report is scoped to the City Corporation the citizen selects (`DNCC`, `DSC
 | Add / edit official status remark          |  ❌  |  ❌  |     ❌      |        ✅        |     ✅      |
 | Create/activate/deactivate User accounts   |  ❌  |  ❌  |     ❌      |        ❌        |     ✅      |
 
-**Key rule:** Users never manually choose their role during login. When an account authenticates on `/login`, Nirapod Path automatically determines their role and routes them to their dedicated dashboard (`/user/dashboard`, `/management/[id]/reports`, `/city-corp/[id]/reports`, or `/super-admin`).
+**Key rule:** Users never manually choose their role during login. When an account authenticates on `/login` or `/admin/login`, Nirapod Path automatically determines their role and routes them to their dedicated dashboard (`/user/dashboard`, `/management/[id]/reports`, `/city-corp/[id]/reports`, or `/super-admin`).
 
 ## Report Status Lifecycle
 
@@ -237,8 +237,10 @@ Implemented entirely client-side:
 ```
 /app
   /(public)
-    /login                -- Dedicated Government-style Login Page (`/login`)
-    /register             -- Dedicated Citizen Registration Page (`/register`)
+    /login                -- Dedicated Citizen Authentication Portal (`/login`)
+    /register             -- Dedicated Citizen Registration Portal (`/register`)
+  /admin
+    /login                -- Official Government Authority & Super Admin Portal (`/admin/login`)
   /demo                   -- Hidden Hackathon Quick-Login Sandbox (`/demo`)
   /user
     /dashboard            -- Citizen Dashboard (My Reports, SOS History, Profile)
