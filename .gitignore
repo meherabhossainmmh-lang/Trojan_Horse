@@ -12,8 +12,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -38,7 +38,7 @@ next-env.d.ts
 .env.test.local
 .env.production.local
 *.db
-*.sqlite3
+*.sqlite
 
 # OS Files
 .DS_Store
