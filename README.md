@@ -281,17 +281,30 @@ Implemented entirely client-side:
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in your keys:
+Copy `.env.example` to `.env` in the project root and insert your tokens:
 
 ```env
-DATABASE_URL=                      # Neon Postgres connection string
+# --- 1. AI API KEYS (Groq / Grok & Voyage AI) ---
+GROK_API_KEY="INSERT_YOUR_GROK_API_KEY_HERE"
+GROK_API_BASE_URL="https://api.x.ai/v1"
+GROK_MODEL="grok-beta"
+VOYAGE_API_KEY="INSERT_YOUR_VOYAGE_API_KEY_HERE"
+VOYAGE_MODEL="voyage-2"
+
+# --- 2. NEON / POSTGRES DATABASE URL ---
+DATABASE_URL=                      # Neon Postgres connection string (or leave blank for demo mode)
+
+# --- 3. EDGESTORE CONFIGURATION (Photo Uploads) ---
 EDGE_STORE_ACCESS_KEY=             # EdgeStore Access Key
 EDGE_STORE_SECRET_KEY=             # EdgeStore Secret Key
-# PUSHER CONFIGURATION
+
+# --- 4. PUSHER CONFIGURATION (Realtime SOS Alerts to City Corporation) ---
 PUSHER_APP_ID=
 NEXT_PUBLIC_PUSHER_KEY=
 NEXT_PUBLIC_PUSHER_SECRET=
 NEXT_PUBLIC_PUSHER_CLUSTER=ap2
+
+# --- 5. AUTH SESSION COOKIE SECRET ---
 SESSION_SECRET=super-secret-key-change-in-prod-deployment
 ```
 
